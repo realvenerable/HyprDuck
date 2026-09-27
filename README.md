@@ -5,7 +5,10 @@
     <a href="../../releases"><img alt="Releases" src="https://img.shields.io/github/v/release/realvenerable/HyprDuck" /></a>
     <a href="../../issues"><img alt="Issues" src="https://img.shields.io/github/issues/realvenerable/HyprDuck" /></a>
   </p>
-  <img height="140" src="assets/hyprduck-mark.svg" alt="HyprDuck" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/hyprduck-mark-inverse.svg" />
+    <img height="140" src="assets/hyprduck-mark.svg" alt="HyprDuck" />
+  </picture>
 </div>
 
 ## Why this exists

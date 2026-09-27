@@ -40,7 +40,10 @@ HyprDuck/
 │   ├── make-icons.sh            # source SVGs -> VectorDrawables
 │   ├── svg2vector.py            # the converter
 │   └── vector2svg.py            # render a drawable back to SVG, to check work
-└── assets/icons/                # source artwork, as plain SVG
+├── assets/
+│   ├── icons/                 # source artwork, as plain SVG
+│   ├── hyprduck-mark.svg         # README mark, dark ink, for light themes
+│   └── hyprduck-mark-inverse.svg # same geometry, light ink, for dark themes
 ```
 
 `res/drawable/` is generated but committed, so building never needs the SVGs.
