@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="dev.realvenerable.hyprduck"
+    android:versionCode="1"
+    android:versionName="1.0">
+
+    <uses-sdk
+        android:minSdkVersion="26"
+        android:targetSdkVersion="35" />
+
+    <!--
+      Needed only for the slider, and only to write SCREEN_BRIGHTNESS. This is an
+      AppOps-gated special permission, not a runtime permission: the user grants
+      it once through ACTION_MANAGE_WRITE_SETTINGS, and
+      Settings.System.canWrite() is the honest check for it. Reading the level
+      needs no permission at all, which is why the readout works with this denied.
+    -->
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+
+    <application
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:theme="@style/Theme.HyprDuck"
+        android:allowBackup="false">
+
+        <activity
+            android:name="dev.realvenerable.hyprduck.MainActivity"
+            android:exported="true"
+            android:label="@string/app_name">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

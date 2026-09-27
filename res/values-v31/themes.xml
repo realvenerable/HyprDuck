@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Material You, API 31+.
+
+      system_accent1_500 is generated from the user's wallpaper, so the single
+      accent used by the meter, slider and chips follows it. This is the only
+      value that differs from the base theme; the surfaces stay dark.
+    -->
+    <style name="Theme.HyprDuck" parent="@android:style/Theme.DeviceDefault">
+        <!-- Must match values/: a qualified folder replaces the style outright,
+             so the ActionBar switches have to be repeated here or the title bar
+             comes back on API 31+. -->
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+
+        <item name="android:windowBackground">@color/bl_background</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+        <item name="blAccent">@android:color/system_accent1_500</item>
+        <item name="blOnAccent">@color/bl_on_accent</item>
+        <item name="blTextPrimary">@color/bl_text_primary</item>
+        <item name="blTextSecondary">@color/bl_text_secondary</item>
+        <item name="blSurface">@color/bl_background</item>
+        <item name="blCard">@color/bl_card</item>
+        <item name="blCardStroke">@color/bl_card_stroke</item>
+        <item name="blTrack">@color/bl_track</item>
+        <item name="blSegmentSelected">@color/bl_segment_selected</item>
+    </style>
+</resources>

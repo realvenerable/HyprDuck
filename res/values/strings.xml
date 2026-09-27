@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">HyprDuck</string>
+
+    <!-- nav -->
+    <string name="nav_brightness">Brightness</string>
+    <string name="nav_about">About</string>
+
+    <!-- brightness page -->
+    <string name="of_max">of 255</string>
+    <string name="ramp_percent">%1$d%% of the 0-255 setting ramp</string>
+    <string name="unavailable">brightness setting unavailable</string>
+    <string name="mode_manual">Manual</string>
+    <string name="mode_automatic">Automatic</string>
+    <string name="mode_default">0 means the device picks its own level</string>
+    <string name="note_auto">Sensor is driving · the number above is the last manual level</string>
+    <string name="float_value">Same level as float: %1$.3f</string>
+    <string name="section_quick">Quick levels</string>
+    <string name="section_saved">Saved levels</string>
+    <string name="saved_empty">Nothing saved yet</string>
+    <string name="action_save">Save current level</string>
+    <string name="action_grant">Allow adjusting brightness</string>
+    <string name="grant_hint">Android only lets an app change brightness once you grant
+        “Modify system settings”. Reading the level needs no permission, so the
+        meter works either way.</string>
+    <string name="preset_saved">Saved %1$d</string>
+    <string name="preset_removed">Removed %1$d</string>
+    <string name="preset_full">Saved list is full (%1$d)</string>
+    <string name="preset_none">No level to save</string>
+    <string name="preset_hint">Tap to apply · hold to delete</string>
+    <string name="settings_unavailable">Cannot open system settings</string>
+
+    <!-- about page -->
+    <string name="version_label">Version %1$s</string>
+    <string name="package_line">Package %1$s</string>
+    <string name="profile_name">Fang Yuan</string>
+    <string name="profile_handle">@realvenerable · tap to open</string>
+    <string name="link_source">Source</string>
+    <string name="link_source_sub">github.com/realvenerable/hyprduck</string>
+    <string name="link_issues">Report an issue</string>
+    <string name="link_issues_sub">Bugs and feature requests</string>
+    <string name="link_releases">Releases</string>
+    <string name="link_releases_sub">Changelog and downloads</string>
+    <string name="link_no_browser">No browser installed to open that link</string>
+    <string name="perm_title">Permission</string>
+    <string name="perm_key_why">WHY</string>
+    <string name="perm_key_does">DOES</string>
+    <string name="perm_key_not">DOESN\u2019T</string>
+    <string name="perm_why">Android gates writes to the brightness setting behind
+        \u201cModify system settings\u201d. Reading the level needs nothing.</string>
+    <string name="perm_does">Writes only the brightness level you pick.</string>
+    <string name="perm_not">There is no internet permission, so nothing can leave the
+        device. No accounts, no analytics.</string>
+
+    <string name="device_title">Device</string>
+    <string name="device_model">%1$s %2$s</string>
+    <string name="device_android">Android %1$s · API %2$d</string>
+    <string name="device_targets">Targets API %1$d · minimum API %2$d</string>
+
+    <string name="link_source_url">https://github.com/realvenerable/hyprduck</string>
+    <string name="link_issues_url">https://github.com/realvenerable/hyprduck/issues</string>
+    <string name="link_releases_url">https://github.com/realvenerable/hyprduck/releases</string>
+</resources>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Custom slots so Palette can read one token set instead of branching on API level. -->
+    <attr name="blAccent" format="color" />
+    <attr name="blOnAccent" format="color" />
+    <attr name="blTextPrimary" format="color" />
+    <attr name="blTextSecondary" format="color" />
+    <attr name="blSurface" format="color" />
+    <attr name="blCard" format="color" />
+    <attr name="blCardStroke" format="color" />
+    <attr name="blTrack" format="color" />
+    <attr name="blSegmentSelected" format="color" />
+</resources>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Dark-first theme.
+
+      Parent is Theme.DeviceDefault because it is the only platform family
+      available back to API 26. Every colour here is a literal rather than a
+      ?android:attr reference: the window is forced dark regardless of the
+      system setting, so framework text colours would resolve to dark values in
+      light mode and become invisible.
+
+      windowLightStatusBar is explicitly false for the same reason - the status
+      bar icons must stay light on the dark surface.
+    -->
+    <style name="Theme.HyprDuck" parent="@android:style/Theme.DeviceDefault">
+        <!--
+          Theme.DeviceDefault brings an ActionBar with it, and the framework
+          then draws the activity label as a title bar at the top of the window.
+          Both switches are needed: windowActionBar for the ActionBar itself,
+          windowNoTitle for the legacy title, which is what a pre-API-24 style
+          inherits.
+        -->
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+
+        <item name="android:windowBackground">@color/bl_background</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+        <item name="blAccent">@color/bl_accent_fallback</item>
+        <item name="blOnAccent">@color/bl_on_accent</item>
+        <item name="blTextPrimary">@color/bl_text_primary</item>
+        <item name="blTextSecondary">@color/bl_text_secondary</item>
+        <item name="blSurface">@color/bl_background</item>
+        <item name="blCard">@color/bl_card</item>
+        <item name="blCardStroke">@color/bl_card_stroke</item>
+        <item name="blTrack">@color/bl_track</item>
+        <item name="blSegmentSelected">@color/bl_segment_selected</item>
+    </style>
+</resources>
