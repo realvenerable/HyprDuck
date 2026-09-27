@@ -1,40 +1,46 @@
 # HyprDuck 1.0
 
-> **Personal project, not a supported release.** This is a side project built for
-> fun and for the exercise of building an Android app with nothing but the SDK
-> command line tools. There is no roadmap, no support promise and no public
-> contribution programme here. Install it if it is useful, but do not rely on
-> it.
+The first release.
 
-The first tagged version. A read-only brightness level readout for Android with
-optional adjustment, built without Android Studio and without Gradle.
+A read-only brightness level readout for Android, with optional adjustment,
+quick levels, saved levels and a bottom navigation bar. Built without Android
+Studio and without Gradle.
 
-## What is in it
+## Why
 
-- The exact brightness level your device has stored, as a large numeral over a
-  tick meter.
-- A slider that writes the level directly, a Manual/Automatic switch, and
-  `WRITE_SETTINGS` requested only when you actually use one of them.
-- Quick levels at even tenths of the 0–255 ramp, and your own saved levels.
-- An About page with the profile, the links, the one permission spelled out, and
-  the device it is running on.
+A friend of mine has mild OCD and uses a HyperOS phone. HyperOS doesn't show the
+brightness level anywhere on the screen, and for them being able to read the
+exact level — and to set it to a number they chose — is genuinely useful. This
+exists for them, and for anyone else who has wanted the same thing.
 
-## Build
+## What's in it
+
+- The exact brightness level from the 0–255 ramp, as a large numeral over a tick
+  meter. Not a rounded guess.
+- A slider that writes the level directly, with Manual / Automatic segments.
+- Quick levels at even tenths of the ramp: 25, 51, 76, 102 … 255.
+- Saved levels as chips. Tap to apply, hold to delete.
+- An About screen with the profile, the links, the one permission spelled out,
+  and the device it is running on.
+
+76 KB. One permission (`WRITE_SETTINGS`), used only for writing brightness. No
+internet permission, so nothing can leave the device.
+
+## Install
 
 ```bash
-./build.sh
+adb install -r hyprduck.apk
 ```
 
-Needs the SDK at `ANDROID_SDK_ROOT` (defaults to
-`/media/Linux/Eos/Linux/android-sdk`) with `platforms;android-35` and
-`build-tools;35.0.0`. A keystore is generated on first build; see the README
-before losing it, because it is what authorises in-place updates.
+Requires Android 8.0 or newer. Tested on Android 15 / HyperOS.
 
-## Notes
+## Known limitations
 
-- **No measured brightness in nits.** There is no public API for it, so the app
-  reports only values it can genuinely read rather than inventing one.
+- **No brightness in nits.** There is no public API for measured brightness, so
+  the app shows only values it can genuinely read.
 - **`screen_brightness_float` is usually absent on HyperOS**, so that line hides
-  itself when the device does not publish it.
-- The launcher icon is a duck head drawn as vector paths, with a monochrome layer
-  for Android 13+ themed icons.
+  itself.
+- Adjusting brightness needs the *Modify system settings* permission, granted
+  once through the system screen. Reading the level needs no permission at all.
+
+Implementation detail is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).

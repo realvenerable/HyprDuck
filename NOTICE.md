@@ -7,7 +7,7 @@ Foundation, either version 3 of the License, or (at your option) any later
 version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRITY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
@@ -15,6 +15,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 ---
 
-This notice covers the artwork in `assets/icons/` and the visual design of the
-application, in addition to the source code. See CREDITS.md for the visual
-reference set that informed the design.
+## Artwork and design
+
+The artwork in `assets/icons/` and the visual design of the application are also
+covered by the licence above.
+
+## AI
+
+Built with AI assistance.

@@ -1,216 +1,93 @@
 <div align="center">
   <h1>HyprDuck</h1>
-  <p><strong>A brightness level readout for Android, built with nothing but the SDK command line tools.</strong></p>
-  <img height="150" src="assets/hyprduck-mark.svg" alt="HyprDuck" />
+  <p><strong>See and set your screen brightness on Android.</strong></p>
+  <p>
+    <a href="../../releases"><img alt="Releases" src="https://img.shields.io/github/v/release/realvenerable/HyprDuck" /></a>
+    <a href="../../issues"><img alt="Issues" src="https://img.shields.io/github/issues/realvenerable/HyprDuck" /></a>
+  </p>
+  <img height="140" src="assets/hyprduck-mark.svg" alt="HyprDuck" />
 </div>
 
-> [!IMPORTANT]
-> **This is a personal project, not a supported release.** It exists to build an
-> Android app end to end with `aapt2`, `javac`, `d8` and `apksigner` and no
-> Gradle, no Android Studio and no third-party libraries. There is no roadmap, no
-> support promise and no public contribution programme. Install it if it is
-> useful, but do not rely on it.
+## Why this exists
 
-A read-only brightness level readout, with optional adjustment, saved levels and
-a bottom navigation bar. ~76 KB, one permission, no network access, no
-analytics.
+A friend of mine has mild OCD and uses a HyperOS phone. HyperOS doesn't show the
+brightness level anywhere on the screen, and for them being able to read the
+exact level — and to set it to a number they chose — is genuinely useful rather
+than a novelty.
+
+So this is for them, and for anyone else who has wanted the same thing. It is the
+brightness number, on screen, always one glance away.
+
+## Screenshots
+
+<!-- Drop phone screenshots here and uncomment:
+<img width="260" src="assets/screenshot-brightness.png" alt="Brightness screen" />
+<img width="260" src="assets/screenshot-about.png" alt="About screen" />
+-->
+_Brightness screen on the left, About on the right._
 
 ## What it does
 
-| | |
-|---|---|
-| **Exact level** | The real stored value from the 0–255 ramp, not a rounded guess |
-| **Tick meter** | Lit ticks up to the current value, in the wallpaper accent colour |
-| **Adjust** | A slider that writes the level live, plus a Manual/Automatic switch |
-| **Quick levels** | Even tenths of the ramp: 25, 51, 76, 102 … 255 |
-| **Saved levels** | Keep the ones you like. Tap to apply, hold to delete |
-| **One permission** | `WRITE_SETTINGS`, and only for writing. Reading needs nothing |
+- **The exact brightness level**, as a large number over a meter — the real
+  stored 0–255 value, not a rounded guess.
+- **Set it** with a slider that moves the screen brightness as you drag, and a
+  Manual / Automatic switch to hand control back to the sensor.
+- **Quick levels** at even tenths of the range: 25, 51, 76, 102 … 255.
+- **Save levels you like.** They become chips you can tap to bring back, or hold
+  to delete.
+- **Two screens**, switched from the bar at the bottom.
 
-## Pages
+76 KB. One permission, used only for writing brightness — and only if you
+adjust. Reading the level needs no permission at all. No internet permission, so
+nothing can leave the phone. No accounts, no analytics, no network code.
 
-| Page | Contents |
-|---|---|
-| **Brightness** | The centred duck mark, the numeral, tick meter, quick levels, slider, mode segments, saved levels |
-| **About** | Identity card, profile, why the permission exists, source, report an issue, releases, device block |
+## Get it
 
-Two pages, switched from a bottom pill bar. There is no system title bar:
-`Theme.DeviceDefault` ships with an ActionBar, and the framework would otherwise
-draw the activity label as a title across the top, so the theme sets
-`windowActionBar` and `windowNoTitle` to false. Both are repeated in
-`values-v31`, because a qualified resource folder replaces a style outright
-rather than merging into it.
+Grab the APK from the [releases page](../../releases) and install it over USB:
 
-## Build
+```bash
+adb install -r hyprduck.apk
+```
+
+Or download the APK on the phone and tap it, allowing installs from that source
+when asked.
+
+Requires Android 8.0 or newer. Tested on Android 15 / HyperOS.
+
+## Build it
 
 ```bash
 ./build.sh
 ```
 
-Requires the SDK at `ANDROID_SDK_ROOT` (defaults to
-`/media/Linux/Eos/Linux/android-sdk`) with `platforms;android-35` and
-`build-tools;35.0.0`. Nothing else — no Gradle wrapper, no `gradlew`.
-
-```
-aapt2 compile --dir res      # XML -> flat
-aapt2 link                   # resources.arsc + AndroidManifest.xml + R.java
-javac --release 17           # JDK 27 emits class file v67, which d8 rejects
-d8 --min-api 26              # classes.dex
-zipalign -f -p 4
-apksigner                    # v1 + v2 + v3
-```
-
-A keystore is generated on first build. **Keep it.** Android matches signatures
-to allow in-place updates, so if you lose it you must uninstall the app before a
-new build will install over it. It is gitignored, deliberately.
-
-### Install
+The build is six command line tools from the Android SDK — `aapt2`, `javac`,
+`d8`, `zipalign`, `apksigner`. No Gradle, no Android Studio, no third-party
+libraries.
 
 ```bash
-adb install -r dist/hyprduck.apk
+export ANDROID_SDK_ROOT=/path/to/android-sdk
+./build.sh
 ```
 
-## Repository layout
+A signing key is created on first build. **Keep it** — it is what lets a new
+version install over an existing one, so if you lose it you have to uninstall
+first. It is gitignored.
 
-```
-HyprDuck/
-├── AndroidManifest.xml
-├── build.sh                     # the whole build, one command
-├── res/
-│   ├── drawable/                # generated VectorDrawables, committed
-│   ├── mipmap-anydpi-v26/       # adaptive icon
-│   ├── values/                  # colours, strings, theme
-│   └── values-v31/              # Material You accent override
-├── src/dev/realvenerable/hyprduck/
-│   ├── MainActivity.java        # shell, navigation, both pages
-│   ├── Palette.java             # theme colours and shape helpers
-│   ├── LevelReadoutView.java    # the large numeral
-│   ├── TickMeterView.java       # the tick meter
-│   └── SliderView.java          # the pill slider
-├── tools/
-│   ├── make-icons.sh            # source SVGs -> VectorDrawables
-│   ├── svg2vector.py            # the converter
-│   └── vector2svg.py            # render a drawable back to SVG, to check work
-├── assets/
-│   ├── icons/                   # source artwork, as plain SVG
-│   └── hyprduck-mark.svg        # the README header mark
-├── CREDITS.md
-├── RELEASE_NOTES.md
-└── LICENSE
-```
+How the build works, how the icon pipeline works and the platform limits worth
+knowing about are all in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-## Design
+## AI
 
-The visual language comes from a personal collection of interface references:
-near-black surfaces, elevated cards with a hairline border, one large
-light-weight numeral with a small unit beside it, a tick meter, pill sliders
-with round thumbs, segmented controls and a bottom pill bar, with a single accent
-used sparingly. That collection is not redistributed here — see
-[CREDITS.md](CREDITS.md) for why.
+Built with AI assistance.
 
-Dark in **both** system modes. That ruled out `?android:attr/textColorPrimary`:
-on a forced dark surface the framework would resolve dark text colours in light
-mode and they would be invisible. Every token is a literal instead, and
-`windowLightStatusBar` is explicitly false so the status bar icons stay legible.
+## Credits
 
-| Token | Value | Used for |
-|---|---|---|
-| `bl_background` | `#0B0B0D` | window, icon background |
-| `bl_card` | `#1A1A1D` | elevated cards, nav pill |
-| `bl_card_stroke` | `#2C2C31` | card hairline |
-| `bl_track` | `#26262A` | meter ticks, segmented container, chips |
-| `bl_segment_selected` | `#33333A` | selected segment, active nav item |
-| `bl_text_primary` | `#F5F5F7` | numeral, buttons, thumb, active icon |
-| `bl_text_secondary` | `#8A8A8F` | units, hints, inactive icon |
-| `bl_accent` | wallpaper on 31+, `#F2C94C` below | current meter tick, slider fill, links |
-
-### Material You
-
-There are **no `Theme.Material3.*` platform styles** — that family exists only
-in the AndroidX support library, which this project does not use. So:
-
-- The theme parent is `@android:style/Theme.DeviceDefault`, the only platform
-  family available back to API 26.
-- `values-v31/themes.xml` overrides only the accent with
-  `@android:color/system_accent1_500`, which the system generates from the
-  wallpaper, so the single accent colour follows it.
-- Everything else is the literal token set above.
-- The components are drawn by hand, because the platform widgets do not render as
-  Material 3.
-
-### Fitting the screen
-
-Both pages fill the screen rather than overflowing it. The level card takes the
-leftover space with `weight = 1`, so it shrinks as the cards below it grow.
-`LevelReadoutView` scales the numeral to the room it is actually given — capped
-at 66% of the available height, then shrunk until the number and its unit fit
-the width — so it grows on a tall screen and shrinks on a short one, including
-at large font scales.
-
-The `ScrollView` on each page is only a fallback for extreme font scales. Its
-scrollbars are disabled in both directions and over-scroll is off, so no scroll
-indicator or glow is ever shown. Every page column ends with a 16 dp spacer, so
-the last card never sits flush against the navigation bar.
-
-`LevelReadoutView` cannot use `setAutoSizeTextTypeUniformWithConfiguration`
-here: inside a horizontal `wrap_content` row the view is measured to fit its own
-text, so it would never shrink and would clip instead.
-
-## Icons
-
-The artwork in `assets/icons/` is plain SVG, converted to VectorDrawables by
-`tools/make-icons.sh` and committed under `res/drawable/`. Building does not need
-the SVGs; regenerating the icons does.
-
-```bash
-./tools/make-icons.sh
-```
-
-`tools/svg2vector.py` does the work, and three things about it are worth knowing
-before editing the artwork:
-
-- **The transform is a real matrix.** The sources wrap their paths in
-  `<g transform="translate(0,H) scale(0.1,-0.1)">`, and a VectorDrawable `<path>`
-  has no `transform` attribute, so the matrix is baked into the coordinates.
-  `translate` and `scale` compose as a 2×3 matrix; folding them into a single
-  scale number scales the translation too.
-- **Relative commands are deltas.** potrace emits plenty of them. The bounding
-  box has to accumulate them against the current point, or the box comes out
-  too small and the fit matrix pushes the art outside the viewport.
-- **pathData cannot exceed `0x7FFF` bytes.** Past that aapt2 reports
-  `STRING_TOO_LARGE` and writes a *truncated* resource, so the drawable renders
-  as nothing at all — the build still succeeds. The portrait needs an
-  Ramer–Douglas–Peucker tolerance of `0.15` to get under it, which is why
-  `make-icons.sh` passes a tolerance for every icon. The converter refuses to
-  emit anything over the limit, so an edit that pushes an icon over fails there
-  instead of silently shipping a blank one.
-
-The launcher foreground is additionally capped at **radius 35**, inside the
-adaptive icon's radius-36 safe circle. The duck is far wider than it is tall, so
-fitting it to a square box would leave the beak and crest outside the mask.
-
-`ic_duck_mark` is the same artwork at a different fit, for use inside the app.
-The launcher layer has to keep margin for the mask, which makes it look small
-when shown in a card.
-
-## Known limits
-
-**Measured brightness in nits is not shown.** There is no public API for it.
-`android.view.Display` has no brightness method at all, and neither
-`Display.BrightnessInfo` nor `android.hardware.display.BrightnessInfo` exists in
-the public SDK — both are `@SystemApi`, blocked by non-SDK interface
-restrictions on Android 9 and later. The app reports only values it can
-genuinely read. The ambient light sensor (`Sensor.TYPE_LIGHT_SENSOR`, in lux, no
-permission) is the closest honest substitute and is not implemented.
-
-`screen_brightness_float` is usually absent on HyperOS, so that line hides itself
-when the device does not publish it.
-
-`WRITE_SETTINGS` is an AppOps-gated special permission, not a runtime one. Until
-you grant it through the system screen, the slider, mode segments and save button
-are hidden and replaced by an *Allow adjusting brightness* button. Reading the
-level needs no permission, so the readout works regardless.
+- **Artwork** — the duck and the portrait in `assets/icons/` are original work by
+  the author. See [CREDITS.md](CREDITS.md).
+- **Visual reference set** — a local collection of interface designs informed
+  the look. Those images are other people's work and are not redistributed here.
 
 ## Licence
 
-[GPL-3.0-or-later](LICENSE). See [NOTICE.md](NOTICE.md) for the artwork and
-[CREDITS.md](CREDITS.md) for provenance.
+[GPL-3.0-or-later](LICENSE). Artwork and design are covered too — see
+[NOTICE.md](NOTICE.md).
