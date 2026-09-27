@@ -10,7 +10,7 @@
 
 ## Why this exists
 
-A friend of mine has mild OCD and uses a HyperOS phone. HyperOS doesn't show the
+A friend of mine has mild OCD and uses HyperOS. HyperOS doesn't show the
 brightness level anywhere on the screen, and for them being able to read the
 exact level — and to set it to a number they chose — is genuinely useful rather
 than a novelty.
