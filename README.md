@@ -73,8 +73,8 @@ A signing key is created on first build. **Keep it** — it is what lets a new
 version install over an existing one, so if you lose it you have to uninstall
 first. It is gitignored.
 
-How the build works, how the icon pipeline works and the platform limits worth
-knowing about are all in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+The build pipeline and the repository layout are in
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## AI
 
