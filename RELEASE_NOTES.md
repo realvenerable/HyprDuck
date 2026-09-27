@@ -26,6 +26,17 @@ exists for them, and for anyone else who has wanted the same thing.
 76 KB. One permission (`WRITE_SETTINGS`), used only for writing brightness. No
 internet permission, so nothing can leave the device.
 
+## One APK, every device
+
+There are no per-ABI builds, and there is nothing to split. The app is pure
+Java compiled to a single `classes.dex` and contains no native code at all — no
+`lib/` directory and no `native-code` attribute in the manifest. Architecture is
+only a property of native libraries, so this one file runs unchanged on 32-bit
+ARM (`armeabi-v7a`), 64-bit ARM (`arm64-v8a`), `x86` and `x86_64`.
+
+If you filter by ABI when installing, pick whichever matches your device; you do
+not need a specific one.
+
 ## Install
 
 ```bash
