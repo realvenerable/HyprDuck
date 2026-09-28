@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -41,9 +42,20 @@ import java.util.Locale;
  * reached from a bottom pill navigation bar.
  *
  * Both pages fill the screen rather than overflowing it. Every page column ends
- * with a fixed spacer so the last card never sits flush against the nav pill.
- * The ScrollView on each page is only a fallback for extreme font scales, and
- * its scrollbars are disabled, so no scroll indicator is ever shown.
+ * with a fixed spacer so the last card never sits flush against the nav pill,
+ * and the level card on the first page takes whatever space the cards below it
+ * leave, which is what keeps that page filling the screen on a tall device.
+ *
+ * Filling it is not free: those cards below are fixed, so on a short screen they
+ * can take all of the viewport and leave the level card nothing, and a weight
+ * only ever adds space, never takes it back. So the page's spacing and card
+ * padding are scaled down as the viewport shortens - see {@link #chromeScale()} -
+ * and the numeral is bounded when it is measured with no height at all, which
+ * is what the page's ScrollView does on its first pass. The ScrollView stays as
+ * the fallback, and its scrollbars are disabled, so no scroll indicator is ever
+ * shown: at a large font scale the first page is a short scroll rather than a
+ * fitted page, and the second page, which has no card to absorb the slack, is
+ * always a scroll.
  *
  * Permissions: WRITE_SETTINGS only, and only for the slider and the level
  * chips. Reading SCREEN_BRIGHTNESS and SCREEN_BRIGHTNESS_MODE needs no
@@ -73,6 +85,30 @@ public final class MainActivity extends Activity {
     /** Breathing room under the last card, above the nav pill. */
     private static final int BOTTOM_GAP_DP = 16;
 
+    /**
+     * The chrome scale, and the viewport it is derived from.
+     *
+     * The level card takes whatever space the cards below it leave, and those
+     * cards are fixed, so on a short screen they can take all of it and the
+     * level card is left with nothing. The spacing and the card padding are
+     * what give way instead: below {@link #CHROME_ROOM} the page starts
+     * tightening up, reaching {@link #CHROME_MIN} at
+     * {@code CHROME_ROOM + CHROME_SPAN} and staying at 1 above that. Measured
+     * against the three screens this was checked on, the page fits at 1 on the
+     * 1079dp one and needs the tightening on the 834dp and 806dp ones, which
+     * is what these numbers reproduce.
+     *
+     * ROOM and the viewport are dp, and the viewport is estimated from the
+     * metrics because the window insets are not known until the view is
+     * attached. The estimate is the screen less the root padding, the nav pill
+     * and a nominal status and navigation bar, which runs about 25dp under the
+     * real figure - close enough to decide how tight to be.
+     */
+    private static final float CHROME_ROOM = 620f;
+    private static final float CHROME_SPAN = 300f;
+    private static final float CHROME_MIN = 0.78f;
+    private static final float WINDOW_ALLOWANCE_DP = 164f;
+
     // Adding a page: give it a constant, add a case in buildPage(), and add its
     // id, icon and label to NAV_PAGES, NAV_ICONS and NAV_LABELS. Nothing else.
     private static final int PAGE_BRIGHTNESS = 0;
@@ -98,6 +134,7 @@ public final class MainActivity extends Activity {
     private Palette palette;
     private SharedPreferences prefs;
     private Thermals thermals;
+    private float chrome;
 
     private FrameLayout pageHost;
     private View[] pageViews;
@@ -134,6 +171,7 @@ public final class MainActivity extends Activity {
 
         palette = new Palette(this);
         thermals = new Thermals(this);
+        chrome = chromeScale();
         prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         loadPresets();
 
@@ -295,14 +333,16 @@ public final class MainActivity extends Activity {
         markRow.setGravity(Gravity.CENTER);
         ImageView mark = new ImageView(this);
         mark.setImageResource(R.drawable.ic_duck_mark);
-        markRow.addView(mark, new LinearLayout.LayoutParams(palette.dp(48), palette.dp(48)));
+        markRow.addView(mark, new LinearLayout.LayoutParams(px(48), px(48)));
         page.addView(markRow, matchWrap());
         page.addView(space(10));
 
         // The level card takes the leftover space and shrinks as the cards below
-        // it grow, which is what keeps the page filling the screen.
+        // it grow, which is what keeps the page filling the screen. On a short
+        // screen the other cards would take all of it, so the chrome scale
+        // tightens the spacing and the padding first.
         LinearLayout levelCard = card(28);
-        levelCard.setPadding(palette.dp(24), palette.dp(18), palette.dp(24), palette.dp(18));
+        pad(levelCard, 24, 18);
         page.addView(levelCard, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
 
@@ -314,15 +354,19 @@ public final class MainActivity extends Activity {
         // the numeral is dragged sideways every time the level changes, and the
         // point of the card is a number that stays put.
         FrameLayout hero = new FrameLayout(this);
+        TextView unit = label(getString(R.string.of_max), 16f, palette.textSecondary, 0f,
+                Gravity.END, Typeface.DEFAULT);
+        // Room for that label, taken from its own measured size rather than a
+        // fixed strip, so a large font scale cannot push it up into the numeral.
+        float unitHeightDp = unit.getPaint().getTextSize() / getResources()
+                .getDisplayMetrics().density;
         FrameLayout.LayoutParams numeralLp = new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        // Room for the corner label, so the numeral is never measured through it.
-        numeralLp.bottomMargin = palette.dp(26);
+        numeralLp.bottomMargin = Math.round(unitHeightDp * 1.45f) + palette.dp(4);
         hero.addView(readoutView, numeralLp);
-        hero.addView(label(getString(R.string.of_max), 16f, palette.textSecondary, 0f,
-                Gravity.END, Typeface.DEFAULT),
-                new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM | Gravity.END));
+        hero.addView(unit, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
+                Gravity.BOTTOM | Gravity.END));
         levelCard.addView(hero, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
 
@@ -356,7 +400,7 @@ public final class MainActivity extends Activity {
         page.addView(space(12));
 
         LinearLayout adjustCard = card(24);
-        adjustCard.setPadding(palette.dp(22), palette.dp(16), palette.dp(22), palette.dp(16));
+        pad(adjustCard, 22, 16);
         page.addView(adjustCard, matchWrap());
 
         slider = new SliderView(this);
@@ -403,7 +447,7 @@ public final class MainActivity extends Activity {
         page.addView(space(12));
 
         LinearLayout savedCard = card(24);
-        savedCard.setPadding(palette.dp(22), palette.dp(16), palette.dp(22), palette.dp(16));
+        pad(savedCard, 22, 16);
         page.addView(savedCard, matchWrap());
 
         LinearLayout savedHeaderRow = new LinearLayout(this);
@@ -439,7 +483,7 @@ public final class MainActivity extends Activity {
      */
     private LinearLayout buildQuickLevels() {
         LinearLayout quick = card(24);
-        quick.setPadding(palette.dp(22), palette.dp(16), palette.dp(22), palette.dp(16));
+        pad(quick, 22, 16);
         quick.addView(sectionLabel(getString(R.string.section_quick)));
 
         LinearLayout row = new LinearLayout(this);
@@ -467,12 +511,12 @@ public final class MainActivity extends Activity {
         // carries its own background layer and shows up as a dark disc.
         LinearLayout identity = card(24);
         identity.setGravity(Gravity.CENTER_HORIZONTAL);
-        identity.setPadding(palette.dp(22), palette.dp(22), palette.dp(22), palette.dp(20));
+        identity.setPadding(px(22), px(22), px(22), px(20));
         page.addView(identity, matchWrap());
 
         ImageView icon = new ImageView(this);
         icon.setImageResource(R.drawable.ic_duck_mark);
-        identity.addView(icon, new LinearLayout.LayoutParams(palette.dp(76), palette.dp(76)));
+        identity.addView(icon, new LinearLayout.LayoutParams(px(76), px(76)));
 
         identity.addView(label(getString(R.string.app_name), 22f, palette.textPrimary, 0f,
                 Gravity.CENTER, Typeface.DEFAULT_BOLD), matchWrap(palette.dp(6)));
@@ -485,7 +529,7 @@ public final class MainActivity extends Activity {
         LinearLayout profile = card(24);
         profile.setOrientation(LinearLayout.HORIZONTAL);
         profile.setGravity(Gravity.CENTER_VERTICAL);
-        profile.setPadding(palette.dp(18), palette.dp(14), palette.dp(18), palette.dp(14));
+        pad(profile, 18, 14);
         profile.setBackground(Palette.ripple(Palette.withAlpha(palette.accent, 0.12f),
                 palette.card(24)));
         profile.setClickable(true);
@@ -520,7 +564,7 @@ public final class MainActivity extends Activity {
         page.addView(space(12));
 
         LinearLayout links = card(24);
-        links.setPadding(palette.dp(6), palette.dp(6), palette.dp(6), palette.dp(6));
+        pad(links, 6, 6);
         page.addView(links, matchWrap());
         links.addView(linkRow(R.string.link_source, R.string.link_source_sub,
                 getString(R.string.link_source_url)));
@@ -533,7 +577,7 @@ public final class MainActivity extends Activity {
         page.addView(space(12));
 
         LinearLayout device = card(24);
-        device.setPadding(palette.dp(22), palette.dp(16), palette.dp(22), palette.dp(16));
+        pad(device, 22, 16);
         page.addView(device, matchWrap());
 
         device.addView(label(getString(R.string.device_title), 11f, palette.textSecondary,
@@ -565,7 +609,7 @@ public final class MainActivity extends Activity {
      */
     private LinearLayout buildPermissionCard() {
         LinearLayout perm = card(24);
-        perm.setPadding(palette.dp(20), palette.dp(18), palette.dp(20), palette.dp(18));
+        pad(perm, 20, 18);
         perm.addView(sectionLabel(getString(R.string.perm_title)));
         perm.addView(permissionBlock(R.string.perm_key_why, R.string.perm_why),
                 matchWrap(palette.dp(14)));
@@ -655,8 +699,31 @@ public final class MainActivity extends Activity {
     private View space(int heightDp) {
         View v = new View(this);
         v.setLayoutParams(new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, palette.dp(heightDp)));
+                ViewGroup.LayoutParams.MATCH_PARENT, px(heightDp)));
         return v;
+    }
+
+    /** A dp value scaled by the chrome, so a short screen tightens up. */
+    private int px(int dp) {
+        return palette.dp(Math.max(2, Math.round(dp * chrome)));
+    }
+
+    /** Card padding, scaled by the chrome. Horizontal too: it is the level
+     *  card's width that decides how large the numeral can be. */
+    private void pad(LinearLayout card, int horizontalDp, int verticalDp) {
+        int h = px(horizontalDp);
+        card.setPadding(h, px(verticalDp), h, px(verticalDp));
+    }
+
+    /**
+     * @return how much of the page's spacing and padding to keep, 1 on a screen
+     *         with room for the page as drawn and {@link #CHROME_MIN} on the
+     *         shortest ones.
+     */
+    private float chromeScale() {
+        DisplayMetrics dm = getResources().getDisplayMetrics();
+        float viewportDp = dm.heightPixels / dm.density - WINDOW_ALLOWANCE_DP;
+        return Math.max(CHROME_MIN, Math.min(1f, (viewportDp - CHROME_ROOM) / CHROME_SPAN));
     }
 
     private LinearLayout card(int radiusDp) {
