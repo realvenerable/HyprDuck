@@ -26,14 +26,15 @@ HyprDuck/
 ├── AndroidManifest.xml
 ├── build.sh                     # the whole build, one command
 ├── res/
+│   ├── anim/                    # the dialog's in and out animations
 │   ├── drawable/                # generated VectorDrawables, committed
 │   ├── mipmap-anydpi-v26/       # adaptive icon
-│   ├── values/                  # colours, strings, theme
+│   ├── values/                  # colours, strings, theme, styles
 │   └── values-v31/              # Material You accent override
 ├── src/dev/realvenerable/hyprduck/
 │   ├── MainActivity.java        # shell, navigation, both pages
 │   ├── Palette.java             # theme colours and shape helpers
-│   ├── LevelReadoutView.java    # the large numeral
+│   ├── LevelReadoutView.java    # the large centred numeral
 │   ├── TickMeterView.java       # the tick meter
 │   ├── Thermals.java            # device temperature, from sysfs
 │   └── SliderView.java          # the pill slider

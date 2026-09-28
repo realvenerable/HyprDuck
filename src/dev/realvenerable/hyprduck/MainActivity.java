@@ -307,9 +307,23 @@ public final class MainActivity extends Activity {
                 ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
 
         readoutView = new LevelReadoutView(this);
-        readoutView.setColours(palette.textPrimary, palette.textSecondary);
-        readoutView.setUnit(getString(R.string.of_max));
-        levelCard.addView(readoutView, new LinearLayout.LayoutParams(
+        readoutView.setColours(palette.textPrimary);
+
+        // The hero: the numeral centred, and its unit parked in the corner. They
+        // are siblings rather than one line of text, because a unit that follows
+        // the numeral is dragged sideways every time the level changes, and the
+        // point of the card is a number that stays put.
+        FrameLayout hero = new FrameLayout(this);
+        FrameLayout.LayoutParams numeralLp = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        // Room for the corner label, so the numeral is never measured through it.
+        numeralLp.bottomMargin = palette.dp(26);
+        hero.addView(readoutView, numeralLp);
+        hero.addView(label(getString(R.string.of_max), 16f, palette.textSecondary, 0f,
+                Gravity.END, Typeface.DEFAULT),
+                new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM | Gravity.END));
+        levelCard.addView(hero, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
 
         meter = new TickMeterView(this);
@@ -732,6 +746,7 @@ public final class MainActivity extends Activity {
         Window window = dialog.getWindow();
         if (window != null) {
             window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            window.setWindowAnimations(R.style.Animation_HyprDuck_Dialog);
         }
         dialog.setOnShowListener(d -> {
             Window shown = dialog.getWindow();

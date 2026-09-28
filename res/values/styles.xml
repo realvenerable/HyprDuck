@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Window animations for the app's own dialogs, applied in code with
+      Window.setWindowAnimations().
+
+      Kept out of the theme on purpose: the theme is duplicated between values/
+      and values-v31/ because a qualified folder replaces a style outright, and a
+      qualified folder doing that to a style only one window uses would be a trap
+      for the next person.
+    -->
+    <style name="Animation.HyprDuck.Dialog" parent="@android:style/Animation.Dialog">
+        <item name="android:windowEnterAnimation">@anim/dialog_in</item>
+        <item name="android:windowExitAnimation">@anim/dialog_out</item>
+    </style>
+</resources>

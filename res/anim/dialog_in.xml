@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The confirmation prompt growing into place.
+
+  A dialog with no animation appears between two frames, which next to the
+  ripples on the buttons reads as a glitch rather than as an answer. Short
+  enough not to get in the way of the question it is asking.
+-->
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:interpolator="@android:anim/decelerate_interpolator">
+
+    <alpha
+        android:fromAlpha="0.0"
+        android:toAlpha="1.0"
+        android:duration="150" />
+
+    <scale
+        android:fromXScale="0.94"
+        android:fromYScale="0.94"
+        android:pivotX="50%"
+        android:pivotY="50%"
+        android:toXScale="1.0"
+        android:toYScale="1.0"
+        android:duration="180" />
+</set>

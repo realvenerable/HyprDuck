@@ -1,10 +1,23 @@
-# HyprDuck 1.0
+# HyprDuck 1.1
 
-The first release.
+A steadier readout, the device temperature, and a confirmation before deleting.
 
-A read-only brightness level readout for Android, with optional adjustment,
-quick levels, saved levels and a bottom navigation bar. Built without Android
-Studio and without Gradle.
+## What changed in 1.1
+
+- **The level numeral is centred, and it holds still.** It is now fitted against
+  the widest value the ramp can hold rather than the value on screen, so it no
+  longer resizes or slides sideways as the level changes, and `of 255` has moved
+  out of the line into the corner of the card. The level is the only thing on the
+  card that moves.
+- **The device temperature**, read from the battery thermistor or a thermal zone,
+  under the level notes. There is no public API for it, so it is best effort and
+  the line hides itself on devices that keep the sensor to themselves.
+- **Deleting a saved level asks first.** A hold is easy to trigger by accident
+  while scrolling the chip strip, and a saved level is not easy to get back. The
+  prompt is drawn from the app's own palette, so it stays dark in light mode, and
+  it now grows in and out instead of appearing between two frames.
+- The About screen spells out the one permission inside its card, with each
+  explanation inset from its heading.
 
 ## Why
 
@@ -15,8 +28,8 @@ exists for them, and for anyone else who has wanted the same thing.
 
 ## What's in it
 
-- The exact brightness level from the 0–255 ramp, as a large numeral over a tick
-  meter. Not a rounded guess.
+- The exact brightness level from the 0–255 ramp, as a large centred numeral over
+  a tick meter. Not a rounded guess.
 - A slider that writes the level directly, with Manual / Automatic segments.
 - Quick levels at even tenths of the ramp: 25, 51, 76, 102 … 255.
 - Saved levels as chips. Tap to apply, hold to delete, confirm to actually delete.

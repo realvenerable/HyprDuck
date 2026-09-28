@@ -31,8 +31,9 @@ _Brightness screen on the left, About on the right._
 
 ## What it does
 
-- **The exact brightness level**, as a large number over a meter — the real
-  stored 0–255 value, not a rounded guess.
+- **The exact brightness level**, as a large centred number over a meter — the
+  real stored 0–255 value, not a rounded guess. The numeral holds still as the
+  level changes, so the level is the only thing on the card that moves.
 - **The device temperature**, read from the sensor the phone already exposes, and
   hidden on the devices that keep it to themselves.
 - **Set it** with a slider that moves the screen brightness as you drag, and a
