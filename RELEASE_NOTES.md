@@ -19,11 +19,12 @@ exists for them, and for anyone else who has wanted the same thing.
   meter. Not a rounded guess.
 - A slider that writes the level directly, with Manual / Automatic segments.
 - Quick levels at even tenths of the ramp: 25, 51, 76, 102 … 255.
-- Saved levels as chips. Tap to apply, hold to delete.
+- Saved levels as chips. Tap to apply, hold to delete, confirm to actually delete.
+- The device temperature, read from the battery thermistor or a thermal zone.
 - An About screen with the profile, the links, the one permission spelled out,
   and the device it is running on.
 
-76 KB. One permission (`WRITE_SETTINGS`), used only for writing brightness. No
+78 KB. One permission (`WRITE_SETTINGS`), used only for writing brightness. No
 internet permission, so nothing can leave the device.
 
 ## One APK, every device
@@ -49,6 +50,8 @@ Requires Android 8.0 or newer. Tested on Android 15 / HyperOS.
 
 - **No brightness in nits.** There is no public API for measured brightness, so
   the app shows only values it can genuinely read.
+- **The temperature line hides itself** on devices that restrict the sysfs
+  sensor nodes, because there is no public API for it either.
 - **`screen_brightness_float` is usually absent on HyperOS**, so that line hides
   itself.
 - Adjusting brightness needs the *Modify system settings* permission, granted

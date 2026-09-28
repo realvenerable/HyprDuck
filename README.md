@@ -33,14 +33,16 @@ _Brightness screen on the left, About on the right._
 
 - **The exact brightness level**, as a large number over a meter — the real
   stored 0–255 value, not a rounded guess.
+- **The device temperature**, read from the sensor the phone already exposes, and
+  hidden on the devices that keep it to themselves.
 - **Set it** with a slider that moves the screen brightness as you drag, and a
   Manual / Automatic switch to hand control back to the sensor.
 - **Quick levels** at even tenths of the range: 25, 51, 76, 102 … 255.
 - **Save levels you like.** They become chips you can tap to bring back, or hold
-  to delete.
+  to delete — which asks first.
 - **Two screens**, switched from the bar at the bottom.
 
-76 KB. One permission, used only for writing brightness — and only if you
+78 KB. One permission, used only for writing brightness — and only if you
 adjust. Reading the level needs no permission at all. No internet permission, so
 nothing can leave the phone. No accounts, no analytics, no network code.
 

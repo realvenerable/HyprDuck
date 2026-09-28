@@ -9,7 +9,7 @@ import android.util.TypedValue;
 import android.view.View;
 
 /**
- * The big level number with a small unit beside it, e.g. "142  of 255".
+ * The big level number with its unit beside it, e.g. "142  of 255".
  *
  * Drawn rather than composed from two TextViews on purpose. The number uses a
  * light weight at a large size, the way the reference set sets its numerals, and
@@ -17,6 +17,10 @@ import android.view.View;
  * TextView cannot do that here: inside a horizontal wrap_content row the view is
  * measured to fit its own text, so it never shrinks and clips instead, which is
  * what the first version did.
+ *
+ * Both sizes are decided together, the unit as a fixed fraction of the numeral,
+ * so the readout reads as one line of text that got bigger rather than as a
+ * number with a caption next to it.
  */
 final class LevelReadoutView extends View {
 
@@ -25,6 +29,7 @@ final class LevelReadoutView extends View {
 
     private String number = "--";
     private String unit = "";
+    private float unitRatio;
     private float unitGap;
     private float minSizePx;
     private float maxSizePx;
@@ -38,11 +43,13 @@ final class LevelReadoutView extends View {
         unitPaint.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
 
         DisplayMetrics dm = getResources().getDisplayMetrics();
-        unitPaint.setTextSize(spToPx(14f, dm));
-        minSizePx = spToPx(40f, dm);
-        maxSizePx = spToPx(150f, dm);
+        // The unit is drawn at this fraction of the numeral, not at a size of
+        // its own, so the two stay in proportion as the numeral is fitted.
+        unitRatio = 0.105f;
+        minSizePx = spToPx(48f, dm);
+        maxSizePx = spToPx(210f, dm);
         stepPx = dp(1f, dm);
-        unitGap = dp(8f, dm);
+        unitGap = dp(6f, dm);
     }
 
     void setColours(int number, int unit) {
@@ -83,11 +90,17 @@ final class LevelReadoutView extends View {
             int availableHeight = MeasureSpec.getSize(heightSpec)
                     - getPaddingTop() - getPaddingBottom();
             if (availableHeight > 0) {
-                // 0.66 rather than filling the hero area: the level card also
-                // carries the meter and two labels below the numeral.
-                size = Math.min(size, availableHeight * 0.66f);
+                // 0.84 rather than filling the hero area outright: the level card
+                // also carries the meter and the notes below the numeral, so the
+                // numeral still has to leave them room.
+                size = Math.min(size, availableHeight * 0.84f);
             }
         }
+
+        // Both sizes are set here, not only in the constructor, because the unit
+        // is drawn at a fixed fraction of the numeral - that is what keeps the
+        // two in proportion as the numeral is fitted to the space.
+        unitPaint.setTextSize(size * unitRatio);
 
         float unitWidth = unit.isEmpty() ? 0f : unitPaint.measureText(unit) + unitGap;
 
@@ -97,6 +110,7 @@ final class LevelReadoutView extends View {
                 && numberPaint.measureText(number) + unitWidth > available) {
             size -= stepPx;
             numberPaint.setTextSize(size);
+            unitPaint.setTextSize(size * unitRatio);
         }
         numberWidth = numberPaint.measureText(number);
 

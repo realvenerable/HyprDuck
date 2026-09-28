@@ -1,12 +1,15 @@
 package dev.realvenerable.hyprduck;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,7 +20,9 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowInsets;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -48,7 +53,8 @@ import java.util.Locale;
  * brightness method at all, and neither Display.BrightnessInfo nor
  * android.hardware.display.BrightnessInfo exists in the public SDK; both are
  * @SystemApi and blocked by non-SDK interface restrictions. Only real values
- * are shown rather than guessed ones.
+ * are shown rather than guessed ones, which is the same rule the device
+ * temperature follows: see Thermals.
  */
 public final class MainActivity extends Activity {
 
@@ -91,6 +97,7 @@ public final class MainActivity extends Activity {
 
     private Palette palette;
     private SharedPreferences prefs;
+    private Thermals thermals;
 
     private FrameLayout pageHost;
     private View[] pageViews;
@@ -102,6 +109,7 @@ public final class MainActivity extends Activity {
     private TextView rampLabel;
     private TextView modeNote;
     private TextView floatLabel;
+    private TextView tempLabel;
     private TextView savedEmpty;
     private TextView saveButton;
     private TextView grantButton;
@@ -125,6 +133,7 @@ public final class MainActivity extends Activity {
         getWindow().getDecorView().setSystemUiVisibility(0);
 
         palette = new Palette(this);
+        thermals = new Thermals(this);
         prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         loadPresets();
 
@@ -319,6 +328,12 @@ public final class MainActivity extends Activity {
         floatLabel.setVisibility(View.GONE);
         levelCard.addView(floatLabel, matchWrap(palette.dp(4)));
 
+        // Device temperature. It is a fact about the phone rather than about
+        // the brightness, so it goes last, under the level notes.
+        tempLabel = label("", 13f, palette.textSecondary, 0f, Gravity.START, Typeface.DEFAULT);
+        tempLabel.setVisibility(View.GONE);
+        levelCard.addView(tempLabel, matchWrap(palette.dp(4)));
+
         // Quick levels: predetermined points on the ramp.
         page.addView(space(12));
         page.addView(buildQuickLevels());
@@ -485,8 +500,7 @@ public final class MainActivity extends Activity {
 
         // Why the app asks for anything at all
         page.addView(space(12));
-        page.addView(sectionLabel(getString(R.string.perm_title)));
-        page.addView(buildPermissionCard(), matchWrap(palette.dp(8)));
+        page.addView(buildPermissionCard());
 
         // Links
         page.addView(space(12));
@@ -530,11 +544,17 @@ public final class MainActivity extends Activity {
      * One permission, stated compactly: why it exists, what it is used for, and
      * what it is not used for. The last part matters most - it is the question
      * users actually have about a permission.
+     *
+     * The heading sits inside the card, as the device heading does, rather than
+     * above it: a lone line of text above a card belongs to nothing, and the
+     * two card headings then start at the same place.
      */
     private LinearLayout buildPermissionCard() {
         LinearLayout perm = card(24);
         perm.setPadding(palette.dp(20), palette.dp(18), palette.dp(20), palette.dp(18));
-        perm.addView(permissionBlock(R.string.perm_key_why, R.string.perm_why));
+        perm.addView(sectionLabel(getString(R.string.perm_title)));
+        perm.addView(permissionBlock(R.string.perm_key_why, R.string.perm_why),
+                matchWrap(palette.dp(14)));
         perm.addView(permissionBlock(R.string.perm_key_does, R.string.perm_does),
                 matchWrap(palette.dp(14)));
         perm.addView(permissionBlock(R.string.perm_key_not, R.string.perm_not),
@@ -546,15 +566,24 @@ public final class MainActivity extends Activity {
      * Label above, sentence below, rather than a two-column grid: the longest
      * key (DOESN'T) has to fit the key column at a readable size, and squeezing
      * both columns against each other is what made the old version cramped.
+     *
+     * The sentence is inset on both sides, so it reads as the body under the
+     * key instead of a second key starting on the same line, and its line
+     * length stays short enough to read comfortably.
      */
     private LinearLayout permissionBlock(int keyRes, int textRes) {
         LinearLayout block = new LinearLayout(this);
         block.setOrientation(LinearLayout.VERTICAL);
         block.addView(label(getString(keyRes), 11f, palette.accent, 0.14f, Gravity.START,
                 Typeface.DEFAULT_BOLD));
+
+        LinearLayout.LayoutParams textLp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        textLp.leftMargin = palette.dp(14);
+        textLp.rightMargin = palette.dp(14);
+        textLp.topMargin = palette.dp(6);
         block.addView(label(getString(textRes), 13f, palette.textSecondary, 0f, Gravity.START,
-                        Typeface.DEFAULT),
-                matchWrap(palette.dp(6)));
+                Typeface.DEFAULT), textLp);
         return block;
     }
 
@@ -663,6 +692,60 @@ public final class MainActivity extends Activity {
         return tv;
     }
 
+    /**
+     * Confirmation prompt, built from the same parts as the pages themselves.
+     *
+     * android.app.AlertDialog would be shorter, but it takes its colours from
+     * the framework theme, which follows the system light and dark setting
+     * while this window is dark in both. A dialog drawn from the palette is
+     * the only way to keep it consistent, and it reuses the card and the
+     * outlined and filled buttons the pages already use.
+     */
+    private void confirm(String title, String body, String confirmText, final Runnable onConfirm) {
+        final Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+        LinearLayout panel = card(28);
+        panel.setPadding(palette.dp(22), palette.dp(20), palette.dp(22), palette.dp(18));
+        panel.addView(label(title, 18f, palette.textPrimary, 0f, Gravity.START,
+                Typeface.DEFAULT_BOLD));
+        panel.addView(label(body, 14f, palette.textSecondary, 0f, Gravity.START,
+                Typeface.DEFAULT), matchWrap(palette.dp(8)));
+
+        LinearLayout actions = new LinearLayout(this);
+        actions.setOrientation(LinearLayout.HORIZONTAL);
+        panel.addView(actions, matchWrap(palette.dp(20)));
+
+        LinearLayout.LayoutParams cancelLp = weighted();
+        cancelLp.rightMargin = palette.dp(10);
+        actions.addView(button(getString(R.string.action_cancel), palette.textPrimary, 0,
+                v -> dialog.dismiss()), cancelLp);
+        actions.addView(button(confirmText, palette.onAccent, palette.accent, v -> {
+            dialog.dismiss();
+            onConfirm.run();
+        }), weighted());
+
+        dialog.setContentView(panel);
+        // The default Dialog window is a full screen sheet with its own
+        // background; transparent plus a hand set width turns it into a card
+        // floating over the page, inset by the page margin on both sides.
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+        dialog.setOnShowListener(d -> {
+            Window shown = dialog.getWindow();
+            if (shown != null) {
+                WindowManager.LayoutParams lp = shown.getAttributes();
+                lp.width = getResources().getDisplayMetrics().widthPixels
+                        - palette.dp(40) * 2;
+                lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                shown.setAttributes(lp);
+            }
+        });
+        dialog.show();
+    }
+
     private LinearLayout linkRow(int titleRes, int subtitleRes, String url) {
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
@@ -709,6 +792,7 @@ public final class MainActivity extends Activity {
         int level = readInt(Settings.System.SCREEN_BRIGHTNESS, -1);
         renderLevel(level);
         renderMode(readInt(Settings.System.SCREEN_BRIGHTNESS_MODE, -1));
+        renderTemperature();
 
         if (!slider.isDragging() && level >= 0) {
             slider.setValue(level);
@@ -737,6 +821,20 @@ public final class MainActivity extends Activity {
         } else {
             floatLabel.setVisibility(View.GONE);
         }
+    }
+
+    /**
+     * Temperature comes from a sysfs node the kernel may not expose, so a
+     * device with nothing readable shows no line rather than a made up one.
+     */
+    private void renderTemperature() {
+        Thermals.Reading reading = thermals.read();
+        if (reading == null) {
+            tempLabel.setVisibility(View.GONE);
+            return;
+        }
+        tempLabel.setVisibility(View.VISIBLE);
+        tempLabel.setText(getString(R.string.temp_value, reading.source, reading.celsius));
     }
 
     private void renderMode(int mode) {
@@ -890,9 +988,14 @@ public final class MainActivity extends Activity {
         for (final int level : presets) {
             TextView tv = chip(String.valueOf(level), palette.accent, palette.track,
                     v -> applyLevelFromChip(level));
-            // Long press removes, so the list cannot fill up permanently.
+            // A hold is easy to trigger by accident while scrolling the chip
+            // strip, and a saved level is not easy to get back, so removing one
+            // is confirmed rather than done on the spot.
             tv.setOnLongClickListener(v -> {
-                removePreset(level);
+                confirm(getString(R.string.preset_delete_title, level),
+                        getString(R.string.preset_delete_body, level),
+                        getString(R.string.preset_delete_confirm),
+                        () -> removePreset(level));
                 return true;
             });
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(

@@ -15,6 +15,12 @@
     <string name="mode_default">0 means the device picks its own level</string>
     <string name="note_auto">Sensor is driving · the number above is the last manual level</string>
     <string name="float_value">Same level as float: %1$.3f</string>
+    <string name="temp_value">%1$s temperature %2$.1f°C</string>
+    <string name="temp_source_battery">Battery</string>
+    <string name="temp_source_skin">Skin</string>
+    <string name="temp_source_shell">Shell</string>
+    <string name="temp_source_soc">SoC</string>
+    <string name="temp_source_device">Device</string>
     <string name="section_quick">Quick levels</string>
     <string name="section_saved">Saved levels</string>
     <string name="saved_empty">Nothing saved yet</string>
@@ -28,6 +34,11 @@
     <string name="preset_full">Saved list is full (%1$d)</string>
     <string name="preset_none">No level to save</string>
     <string name="preset_hint">Tap to apply · hold to delete</string>
+    <string name="preset_delete_title">Delete %1$d?</string>
+    <string name="preset_delete_body">This removes the saved level %1$d. You can save
+        it again from the slider whenever you want it back.</string>
+    <string name="preset_delete_confirm">Delete</string>
+    <string name="action_cancel">Cancel</string>
     <string name="settings_unavailable">Cannot open system settings</string>
 
     <!-- about page -->

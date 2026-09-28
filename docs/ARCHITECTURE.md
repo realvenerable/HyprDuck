@@ -35,6 +35,7 @@ HyprDuck/
 │   ├── Palette.java             # theme colours and shape helpers
 │   ├── LevelReadoutView.java    # the large numeral
 │   ├── TickMeterView.java       # the tick meter
+│   ├── Thermals.java            # device temperature, from sysfs
 │   └── SliderView.java          # the pill slider
 ├── tools/
 │   ├── make-icons.sh            # source SVGs -> VectorDrawables
